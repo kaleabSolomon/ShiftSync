@@ -1,0 +1,3 @@
+{
+  "extends": "@ShiftSync/config/tsconfig.base.json"
+}

@@ -1,0 +1,37 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@ShiftSync/backend": "workspace:*",
+    "@ShiftSync/env": "workspace:*",
+    "@ShiftSync/ui": "workspace:*",
+    "@convex-dev/better-auth": "catalog:",
+    "@tanstack/react-form": "^1.28.0",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "better-auth": "catalog:",
+    "convex": "catalog:",
+    "dotenv": "catalog:",
+    "lucide-react": "catalog:",
+    "next": "^16.1.1",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sonner": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@ShiftSync/config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^20",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "^5"
+  }
+}
