@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as availability from "../availability.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as helpers_auth from "../helpers/auth.js";
 import type * as http from "../http.js";
@@ -16,6 +17,7 @@ import type * as locations from "../locations.js";
 import type * as privateData from "../privateData.js";
 import type * as seed from "../seed.js";
 import type * as seedDomainData from "../seedDomainData.js";
+import type * as shifts from "../shifts.js";
 import type * as userProfiles from "../userProfiles.js";
 
 import type {
@@ -26,6 +28,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  availability: typeof availability;
   healthCheck: typeof healthCheck;
   "helpers/auth": typeof helpers_auth;
   http: typeof http;
@@ -33,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   privateData: typeof privateData;
   seed: typeof seed;
   seedDomainData: typeof seedDomainData;
+  shifts: typeof shifts;
   userProfiles: typeof userProfiles;
 }>;
 
