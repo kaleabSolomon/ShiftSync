@@ -13,6 +13,8 @@ import type * as healthCheck from "../healthCheck.js";
 import type * as helpers_auth from "../helpers/auth.js";
 import type * as http from "../http.js";
 import type * as privateData from "../privateData.js";
+import type * as seed from "../seed.js";
+import type * as seedDomainData from "../seedDomainData.js";
 import type * as userProfiles from "../userProfiles.js";
 
 import type {
@@ -27,6 +29,8 @@ declare const fullApi: ApiFromModules<{
   "helpers/auth": typeof helpers_auth;
   http: typeof http;
   privateData: typeof privateData;
+  seed: typeof seed;
+  seedDomainData: typeof seedDomainData;
   userProfiles: typeof userProfiles;
 }>;
 
