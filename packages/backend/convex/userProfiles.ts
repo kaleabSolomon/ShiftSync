@@ -47,9 +47,14 @@ export const ensureProfile = mutation({
     }
 
     // Create profile using name from Better Auth user record
+    const fallbackName =
+      typeof authUser.name === "string" && authUser.name.trim().length > 0
+        ? authUser.name
+        : (authUser.email ?? "User");
+
     const profileId = await ctx.db.insert("userProfiles", {
       authUserId: String(authUser._id),
-      name: authUser.name,
+      name: fallbackName,
       role: "staff",
       homeTimezone: "America/New_York",
       skills: [],
