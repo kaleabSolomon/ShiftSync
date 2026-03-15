@@ -1,6 +1,11 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { assertManagerOfLocation, requireUserProfile } from "./helpers/auth";
+import {
+  assertAdminOrManager,
+  assertManagerOfLocation,
+  requireUserProfile,
+} from "./helpers/auth";
+import { validateAssignment } from "./helpers/constraints";
 
 const skillValidator = v.union(
   v.literal("bartender"),
@@ -309,5 +314,47 @@ export const getShift = query({
       ...shift,
       assignments: assignmentsWithStaff,
     };
+  },
+});
+
+export const suggestAlternatives = query({
+  args: {
+    shiftId: v.id("shifts"),
+  },
+  handler: async (ctx, args) => {
+    await assertAdminOrManager(ctx);
+
+    const shift = await ctx.db.get(args.shiftId);
+    if (!shift) {
+      throw new ConvexError("Shift not found");
+    }
+
+    // Get all staff members
+    const allStaff = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_role", (q) => q.eq("role", "staff"))
+      .collect();
+
+    const eligible: Array<{
+      staffId: string;
+      name: string;
+      warnings: string[];
+    }> = [];
+
+    for (const staff of allStaff) {
+      const result = await validateAssignment(ctx, staff._id, args.shiftId);
+      if (result.valid) {
+        eligible.push({
+          staffId: staff._id,
+          name: staff.name,
+          warnings: result.warnings,
+        });
+      }
+    }
+
+    // Sort by fewest warnings first
+    eligible.sort((a, b) => a.warnings.length - b.warnings.length);
+
+    return eligible;
   },
 });

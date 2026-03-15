@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as availability from "../availability.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as helpers_auth from "../helpers/auth.js";
+import type * as helpers_constraints from "../helpers/constraints.js";
 import type * as http from "../http.js";
 import type * as locations from "../locations.js";
 import type * as privateData from "../privateData.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   availability: typeof availability;
   healthCheck: typeof healthCheck;
   "helpers/auth": typeof helpers_auth;
+  "helpers/constraints": typeof helpers_constraints;
   http: typeof http;
   locations: typeof locations;
   privateData: typeof privateData;
