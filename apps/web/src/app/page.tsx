@@ -1,46 +1,52 @@
 "use client";
+
 import { api } from "@ShiftSync/backend/convex/_generated/api";
-import { useQuery } from "convex/react";
+import {
+  Authenticated,
+  AuthLoading,
+  Unauthenticated,
+  useQuery,
+} from "convex/react";
+import { useState } from "react";
 
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
+import SignInForm from "@/components/sign-in-form";
+import SignUpForm from "@/components/sign-up-form";
+import UserMenu from "@/components/user-menu";
 
 export default function Home() {
-  const healthCheck = useQuery(api.healthCheck.get);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const privateData = useQuery(api.privateData.get);
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-2">
-      <pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
-      <div className="grid gap-6">
-        <section className="rounded-lg border p-4">
-          <h2 className="mb-2 font-medium">API Status</h2>
-          <div className="flex items-center gap-2">
-            <div
-              className={`h-2 w-2 rounded-full ${healthCheck === "OK" ? "bg-green-500" : healthCheck === undefined ? "bg-orange-400" : "bg-red-500"}`}
-            />
-            <span className="text-sm text-muted-foreground">
-              {healthCheck === undefined
-                ? "Checking..."
-                : healthCheck === "OK"
-                  ? "Connected"
-                  : "Error"}
-            </span>
-          </div>
-        </section>
-      </div>
-    </div>
+    <>
+      <Authenticated>
+        <div className="container mx-auto max-w-3xl px-4 py-8">
+          <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
+          <section className="rounded-lg border p-4 mb-6">
+            <h2 className="mb-2 font-medium text-sm text-muted-foreground uppercase tracking-wider">
+              Private Data
+            </h2>
+            <p className="text-lg">
+              {privateData?.message || "No data available"}
+            </p>
+          </section>
+          <UserMenu />
+        </div>
+      </Authenticated>
+      <Unauthenticated>
+        <div className="flex min-h-[80vh] items-center justify-center">
+          {showSignIn ? (
+            <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
+          ) : (
+            <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
+          )}
+        </div>
+      </Unauthenticated>
+      <AuthLoading>
+        <div className="flex min-h-[80vh] items-center justify-center">
+          <div className="text-muted-foreground animate-pulse">Loading...</div>
+        </div>
+      </AuthLoading>
+    </>
   );
 }
