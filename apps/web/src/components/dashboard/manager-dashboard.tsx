@@ -3,7 +3,7 @@
 import { api } from "@ShiftSync/backend/convex/_generated/api";
 import type { Id } from "@ShiftSync/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 
 import {
@@ -42,10 +42,15 @@ export function ManagerDashboard({
   const activeLocationId =
     selectedLocationId ?? (locations.length > 0 ? locations[0]._id : undefined);
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0); // start of today UTC
-  const weekStart = today.getTime();
-  const weekEnd = weekStart + 7 * 24 * 60 * 60 * 1000;
+  // Memoize date range so useQuery args are stable across renders
+  const { weekStart, weekEnd } = useMemo(() => {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    return {
+      weekStart: today.getTime(),
+      weekEnd: today.getTime() + 7 * 24 * 60 * 60 * 1000,
+    };
+  }, []);
 
   const locationShifts = useQuery(
     api.shifts.listShifts,
@@ -134,7 +139,7 @@ export function ManagerDashboard({
                   {locationShifts.map((shift) => (
                     <div
                       key={shift._id}
-                      className="flex items-center justify-between p-4 mix-blend-color"
+                      className="flex items-center justify-between p-4"
                     >
                       <div>
                         <div className="flex items-center gap-2">
@@ -161,7 +166,7 @@ export function ManagerDashboard({
                             <Badge variant="secondary">Premium</Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1 text-transform: capitalize">
+                        <p className="text-sm text-muted-foreground mt-1 capitalize">
                           {shift.requiredSkill.replace("_", " ")} • Headcount:{" "}
                           {shift.headcount}
                         </p>

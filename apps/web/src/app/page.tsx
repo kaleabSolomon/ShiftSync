@@ -5,10 +5,11 @@ import {
   Authenticated,
   AuthLoading,
   Unauthenticated,
+  useConvexAuth,
   useMutation,
   useQuery,
 } from "convex/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
@@ -17,15 +18,20 @@ import { StaffDashboard } from "@/components/dashboard/staff-dashboard";
 import { ManagerDashboard } from "@/components/dashboard/manager-dashboard";
 
 function Dashboard() {
+  const { isAuthenticated } = useConvexAuth();
   const profile = useQuery(api.userProfiles.getMyProfile);
   const ensureProfile = useMutation(api.userProfiles.ensureProfile);
+  const ensureProfileCalled = useRef(false);
 
   useEffect(() => {
-    // If authenticated but no profile exists, create one
-    if (profile === null) {
-      ensureProfile();
+    // Only call when Convex confirms we're authenticated AND profile is null
+    if (isAuthenticated && profile === null && !ensureProfileCalled.current) {
+      ensureProfileCalled.current = true;
+      ensureProfile().catch(() => {
+        ensureProfileCalled.current = false;
+      });
     }
-  }, [profile, ensureProfile]);
+  }, [isAuthenticated, profile, ensureProfile]);
 
   if (!profile) {
     return (

@@ -2,8 +2,9 @@
 
 import { api } from "@ShiftSync/backend/convex/_generated/api";
 import type { Id } from "@ShiftSync/backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { format } from "date-fns";
+import { useMemo } from "react";
 
 import { Button } from "@ShiftSync/ui/components/button";
 import {
@@ -15,11 +16,15 @@ import {
 } from "@ShiftSync/ui/components/card";
 
 export function StaffDashboard({ staffId }: { staffId: Id<"userProfiles"> }) {
-  // 1. Get schedule for the upcoming 7 days starting today
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0); // start of today UTC
-  const weekStart = today.getTime();
-  const weekEnd = weekStart + 7 * 24 * 60 * 60 * 1000;
+  // Memoize date range so useQuery args are stable across renders
+  const { weekStart, weekEnd } = useMemo(() => {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    return {
+      weekStart: today.getTime(),
+      weekEnd: today.getTime() + 7 * 24 * 60 * 60 * 1000,
+    };
+  }, []);
 
   const schedule = useQuery(api.shiftAssignments.getStaffSchedule, {
     staffId,

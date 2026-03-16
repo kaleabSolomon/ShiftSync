@@ -1,8 +1,9 @@
+"use client";
+
 import { StaffDashboard } from "@/components/dashboard/staff-dashboard";
 import { ManagerDashboard } from "@/components/dashboard/manager-dashboard";
 import { api } from "@ShiftSync/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { Authenticated } from "convex/react";
 
 export default function DashboardIndex() {
   const profile = useQuery(api.userProfiles.getMyProfile);
