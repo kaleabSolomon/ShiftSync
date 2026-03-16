@@ -17,11 +17,20 @@ function AuthenticatedNav() {
       <nav className="hidden gap-6 text-sm font-medium transition-colors md:flex">
         {profile.role === "staff" ? (
           <>
-            <Link href="/dashboard" className="hover:text-primary">
-              My Schedule
+            <Link href="/dashboard/schedule" className="hover:text-primary">
+              Schedule
+            </Link>
+            <Link href="/dashboard/availability" className="hover:text-primary">
+              Availability
             </Link>
             <Link href="/dashboard/swaps" className="hover:text-primary">
-              Swap Requests
+              Swaps
+            </Link>
+            <Link
+              href="/dashboard/notifications"
+              className="hover:text-primary"
+            >
+              Notifications
             </Link>
           </>
         ) : (
