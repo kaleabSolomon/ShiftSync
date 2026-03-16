@@ -18,6 +18,7 @@ import type * as locations from "../locations.js";
 import type * as privateData from "../privateData.js";
 import type * as seed from "../seed.js";
 import type * as seedDomainData from "../seedDomainData.js";
+import type * as shiftAssignments from "../shiftAssignments.js";
 import type * as shifts from "../shifts.js";
 import type * as userProfiles from "../userProfiles.js";
 
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   privateData: typeof privateData;
   seed: typeof seed;
   seedDomainData: typeof seedDomainData;
+  shiftAssignments: typeof shiftAssignments;
   shifts: typeof shifts;
   userProfiles: typeof userProfiles;
 }>;
