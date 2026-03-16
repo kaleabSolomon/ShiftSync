@@ -35,14 +35,20 @@ function AuthenticatedNav() {
           </>
         ) : (
           <>
-            <Link href="/dashboard" className="hover:text-primary">
-              Location Schedule
+            <Link href="/manage/shifts" className="hover:text-primary">
+              Shifts
             </Link>
-            <Link href="/dashboard/metrics" className="hover:text-primary">
-              Metrics & Analytics
+            <Link href="/manage/schedule" className="hover:text-primary">
+              Schedule
             </Link>
-            <Link href="/dashboard/audit" className="hover:text-primary">
-              Audit Logs
+            <Link href="/manage/staff" className="hover:text-primary">
+              Staff
+            </Link>
+            <Link href="/manage/swaps" className="hover:text-primary">
+              Swaps
+            </Link>
+            <Link href="/manage/analytics" className="hover:text-primary">
+              Analytics
             </Link>
           </>
         )}
