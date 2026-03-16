@@ -219,14 +219,13 @@ export const approveSwap = mutation({
     });
 
     // Write audit log
-    await ctx.db.insert("auditLog", {
+    await ctx.scheduler.runAfter(0, internal.auditLog.writeAuditLog, {
       actorId: caller._id,
       action: "approve_swap",
       entityType: "shift",
       entityId: shift._id,
       beforeState: { staffId: swap.requesterId },
       afterState: { staffId: swap.targetId },
-      timestamp: now,
     });
 
     // Notify both staff

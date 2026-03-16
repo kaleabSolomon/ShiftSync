@@ -64,7 +64,7 @@ export const createShift = mutation({
 
     const isPremium = isPremiumShift(args.startTime, location.timezone);
 
-    return await ctx.db.insert("shifts", {
+    const shiftId = await ctx.db.insert("shifts", {
       locationId: args.locationId,
       startTime: args.startTime,
       endTime: args.endTime,
@@ -74,6 +74,22 @@ export const createShift = mutation({
       isPremium,
       createdBy: caller._id,
     });
+
+    await ctx.scheduler.runAfter(0, internal.auditLog.writeAuditLog, {
+      actorId: caller._id,
+      action: "create_shift",
+      entityType: "shift",
+      entityId: shiftId,
+      afterState: {
+        locationId: args.locationId,
+        startTime: args.startTime,
+        endTime: args.endTime,
+        requiredSkill: args.requiredSkill,
+        headcount: args.headcount,
+      },
+    });
+
+    return shiftId;
   },
 });
 
@@ -160,6 +176,21 @@ export const updateShift = mutation({
     }
 
     await ctx.db.patch(args.shiftId, patch);
+
+    await ctx.scheduler.runAfter(0, internal.auditLog.writeAuditLog, {
+      actorId: (await assertManagerOfLocation(ctx, shift.locationId))._id,
+      action: "update_shift",
+      entityType: "shift",
+      entityId: args.shiftId,
+      beforeState: {
+        startTime: shift.startTime,
+        endTime: shift.endTime,
+        requiredSkill: shift.requiredSkill,
+        headcount: shift.headcount,
+      },
+      afterState: patch,
+    });
+
     return args.shiftId;
   },
 });
@@ -200,6 +231,20 @@ export const deleteShift = mutation({
     }
 
     await ctx.db.delete(args.shiftId);
+
+    await ctx.scheduler.runAfter(0, internal.auditLog.writeAuditLog, {
+      actorId: (await assertManagerOfLocation(ctx, shift.locationId))._id,
+      action: "delete_shift",
+      entityType: "shift",
+      entityId: args.shiftId,
+      beforeState: {
+        locationId: shift.locationId,
+        startTime: shift.startTime,
+        endTime: shift.endTime,
+        requiredSkill: shift.requiredSkill,
+      },
+    });
+
     return null;
   },
 });

@@ -62,7 +62,7 @@ export const assignStaffToShift = mutation({
     });
 
     // Write audit log
-    await ctx.db.insert("auditLog", {
+    await ctx.scheduler.runAfter(0, internal.auditLog.writeAuditLog, {
       actorId: caller._id,
       action: "assign_staff",
       entityType: "shift",
@@ -71,7 +71,6 @@ export const assignStaffToShift = mutation({
         staffId: args.staffId,
         overrideReason: args.overrideReason,
       },
-      timestamp: now,
     });
 
     // Notify staff
@@ -112,13 +111,12 @@ export const unassignStaffFromShift = mutation({
     await ctx.db.delete(args.assignmentId);
 
     // Write audit log
-    await ctx.db.insert("auditLog", {
+    await ctx.scheduler.runAfter(0, internal.auditLog.writeAuditLog, {
       actorId: caller._id,
       action: "unassign_staff",
       entityType: "shift",
       entityId: shift._id,
       beforeState: { staffId: assignment.staffId },
-      timestamp: now,
     });
 
     // Notify staff
