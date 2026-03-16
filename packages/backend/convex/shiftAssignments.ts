@@ -75,7 +75,7 @@ export const assignStaffToShift = mutation({
 
     // Notify staff
     await ctx.db.insert("notifications", {
-      userId: args.staffId as any,
+      userId: args.staffId,
       type: "shift_assigned",
       message: "You have been assigned to a new shift.",
       isRead: false,
@@ -124,7 +124,7 @@ export const unassignStaffFromShift = mutation({
 
     // Notify staff
     await ctx.db.insert("notifications", {
-      userId: assignment.staffId as any,
+      userId: assignment.staffId,
       type: "shift_unassigned",
       message: "You have been unassigned from a shift.",
       isRead: false,

@@ -242,7 +242,7 @@ export const publishSchedule = mutation({
     // Send exactly one notification per staff member affected
     for (const staffId of notifiedStaffIds) {
       await ctx.db.insert("notifications", {
-        userId: staffId as any,
+        userId: staffId as any, // Set<string> loses type info
         type: "schedule_published",
         message: "A new schedule for your location has been published.",
         isRead: false,

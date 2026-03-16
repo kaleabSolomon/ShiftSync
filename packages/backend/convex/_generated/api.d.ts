@@ -20,6 +20,7 @@ import type * as seed from "../seed.js";
 import type * as seedDomainData from "../seedDomainData.js";
 import type * as shiftAssignments from "../shiftAssignments.js";
 import type * as shifts from "../shifts.js";
+import type * as swapRequests from "../swapRequests.js";
 import type * as userProfiles from "../userProfiles.js";
 
 import type {
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   seedDomainData: typeof seedDomainData;
   shiftAssignments: typeof shiftAssignments;
   shifts: typeof shifts;
+  swapRequests: typeof swapRequests;
   userProfiles: typeof userProfiles;
 }>;
 
