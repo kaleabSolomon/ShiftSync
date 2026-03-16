@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as analytics from "../analytics.js";
+import type * as auditLog from "../auditLog.js";
 import type * as auth from "../auth.js";
 import type * as availability from "../availability.js";
 import type * as healthCheck from "../healthCheck.js";
@@ -31,6 +33,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  analytics: typeof analytics;
+  auditLog: typeof auditLog;
   auth: typeof auth;
   availability: typeof availability;
   healthCheck: typeof healthCheck;
