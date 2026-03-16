@@ -15,6 +15,7 @@ import type * as helpers_auth from "../helpers/auth.js";
 import type * as helpers_constraints from "../helpers/constraints.js";
 import type * as http from "../http.js";
 import type * as locations from "../locations.js";
+import type * as notifications from "../notifications.js";
 import type * as privateData from "../privateData.js";
 import type * as seed from "../seed.js";
 import type * as seedDomainData from "../seedDomainData.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   "helpers/constraints": typeof helpers_constraints;
   http: typeof http;
   locations: typeof locations;
+  notifications: typeof notifications;
   privateData: typeof privateData;
   seed: typeof seed;
   seedDomainData: typeof seedDomainData;

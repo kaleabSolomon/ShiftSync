@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import {
   assertAdminOrManager,
   assertManagerOfLocation,
@@ -84,12 +85,10 @@ export const requestSwap = mutation({
     });
 
     // Notify target staff
-    await ctx.db.insert("notifications", {
+    await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
       userId: args.targetId,
       type: "swap_requested",
       message: `${caller.name} has requested to swap a shift with you.`,
-      isRead: false,
-      createdAt: now + 1,
       relatedEntityId: swapId,
     });
 
@@ -132,12 +131,10 @@ export const acceptSwap = mutation({
 
     const now = Date.now();
     for (const ma of managerAssignments) {
-      await ctx.db.insert("notifications", {
+      await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
         userId: ma.managerId,
         type: "swap_accepted",
         message: "A shift swap has been accepted and needs your approval.",
-        isRead: false,
-        createdAt: now,
         relatedEntityId: args.swapRequestId,
       });
     }
@@ -181,13 +178,10 @@ export const approveSwap = mutation({
       // Reject the swap with the constraint error
       await ctx.db.patch(args.swapRequestId, { status: "rejected" });
 
-      const now = Date.now();
-      await ctx.db.insert("notifications", {
+      await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
         userId: swap.requesterId,
         type: "swap_rejected",
         message: `Swap rejected: ${validation.errors[0]}`,
-        isRead: false,
-        createdAt: now,
         relatedEntityId: args.swapRequestId,
       });
 
@@ -236,21 +230,17 @@ export const approveSwap = mutation({
     });
 
     // Notify both staff
-    await ctx.db.insert("notifications", {
+    await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
       userId: swap.requesterId,
       type: "swap_approved",
       message: "Your shift swap request has been approved.",
-      isRead: false,
-      createdAt: now + 1,
       relatedEntityId: args.swapRequestId,
     });
-    await ctx.db.insert("notifications", {
+    await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
       userId: swap.targetId,
       type: "swap_approved",
       message:
         "A shift swap you accepted has been approved. You are now assigned.",
-      isRead: false,
-      createdAt: now + 2,
       relatedEntityId: args.swapRequestId,
     });
 
@@ -285,13 +275,10 @@ export const rejectSwap = mutation({
 
     await ctx.db.patch(args.swapRequestId, { status: "rejected" });
 
-    const now = Date.now();
-    await ctx.db.insert("notifications", {
+    await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
       userId: swap.requesterId,
       type: "swap_rejected",
       message: "Your shift swap request has been rejected.",
-      isRead: false,
-      createdAt: now,
       relatedEntityId: args.swapRequestId,
     });
 

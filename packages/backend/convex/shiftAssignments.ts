@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { assertManagerOfLocation, requireUserProfile } from "./helpers/auth";
 import { validateAssignment } from "./helpers/constraints";
 
@@ -74,12 +75,10 @@ export const assignStaffToShift = mutation({
     });
 
     // Notify staff
-    await ctx.db.insert("notifications", {
+    await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
       userId: args.staffId,
       type: "shift_assigned",
       message: "You have been assigned to a new shift.",
-      isRead: false,
-      createdAt: now + 1,
       relatedEntityId: args.shiftId,
     });
 
@@ -123,12 +122,10 @@ export const unassignStaffFromShift = mutation({
     });
 
     // Notify staff
-    await ctx.db.insert("notifications", {
+    await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
       userId: assignment.staffId,
       type: "shift_unassigned",
       message: "You have been unassigned from a shift.",
-      isRead: false,
-      createdAt: now + 1,
       relatedEntityId: shift._id,
     });
 

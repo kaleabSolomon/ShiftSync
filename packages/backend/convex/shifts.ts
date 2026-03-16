@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import {
   assertAdminOrManager,
   assertManagerOfLocation,
@@ -133,25 +134,28 @@ export const updateShift = mutation({
         await ctx.db.patch(swap._id, { status: "cancelled" });
 
         // Notify both users
-        const now = Date.now();
-        await ctx.db.insert("notifications", {
-          userId: swap.requesterId,
-          type: "swap_cancelled",
-          message:
-            "Your swap request was cancelled because the shift details changed.",
-          isRead: false,
-          createdAt: now,
-          relatedEntityId: swap._id,
-        });
-        await ctx.db.insert("notifications", {
-          userId: swap.targetId,
-          type: "swap_cancelled",
-          message:
-            "A swap request assigned to you was cancelled because the shift details changed.",
-          isRead: false,
-          createdAt: now + 1,
-          relatedEntityId: swap._id,
-        });
+        await ctx.scheduler.runAfter(
+          0,
+          internal.notifications.sendNotification,
+          {
+            userId: swap.requesterId,
+            type: "swap_cancelled",
+            message:
+              "Your swap request was cancelled because the shift details changed.",
+            relatedEntityId: swap._id,
+          },
+        );
+        await ctx.scheduler.runAfter(
+          0,
+          internal.notifications.sendNotification,
+          {
+            userId: swap.targetId,
+            type: "swap_cancelled",
+            message:
+              "A swap request assigned to you was cancelled because the shift details changed.",
+            relatedEntityId: swap._id,
+          },
+        );
       }
     }
 
@@ -241,12 +245,10 @@ export const publishSchedule = mutation({
 
     // Send exactly one notification per staff member affected
     for (const staffId of notifiedStaffIds) {
-      await ctx.db.insert("notifications", {
+      await ctx.scheduler.runAfter(0, internal.notifications.sendNotification, {
         userId: staffId as any, // Set<string> loses type info
         type: "schedule_published",
         message: "A new schedule for your location has been published.",
-        isRead: false,
-        createdAt: now,
       });
     }
 
