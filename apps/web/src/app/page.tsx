@@ -66,8 +66,21 @@ function Dashboard() {
   );
 }
 
-export default function Home() {
-  const [showSignIn, setShowSignIn] = useState(false);
+import { LandingPage } from "@/components/landing-page";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const authSearch = searchParams.get("auth");
+
+  const showSignIn = authSearch === "login";
+  const showSignUp = authSearch === "signup";
+  const isLanding = !showSignIn && !showSignUp;
+
+  const switchToSignIn = () => router.push("/?auth=login");
+  const switchToSignUp = () => router.push("/?auth=signup");
 
   return (
     <>
@@ -75,19 +88,39 @@ export default function Home() {
         <Dashboard />
       </Authenticated>
       <Unauthenticated>
-        <div className="flex min-h-[80vh] items-center justify-center">
-          {showSignIn ? (
-            <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
-          ) : (
-            <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
-          )}
-        </div>
+        {isLanding ? (
+          <LandingPage />
+        ) : (
+          <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center p-4">
+            <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
+              {showSignIn ? (
+                <SignInForm onSwitchToSignUp={switchToSignUp} />
+              ) : (
+                <SignUpForm onSwitchToSignIn={switchToSignIn} />
+              )}
+            </div>
+          </div>
+        )}
       </Unauthenticated>
       <AuthLoading>
-        <div className="flex min-h-[80vh] items-center justify-center">
+        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
           <div className="text-muted-foreground animate-pulse">Loading...</div>
         </div>
       </AuthLoading>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
+          <div className="text-muted-foreground animate-pulse">Loading...</div>
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 }

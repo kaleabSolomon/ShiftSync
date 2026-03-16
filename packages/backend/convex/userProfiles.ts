@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 import {
+  assertAdmin,
   assertAdminOrManager,
   getCurrentUserProfile,
   requireUserProfile,
@@ -174,6 +175,17 @@ export const updateStaffProfile = mutation({
 
     await ctx.db.patch(targetId, patch);
     return targetId;
+  },
+});
+
+export const updateRole = mutation({
+  args: {
+    userId: v.id("userProfiles"),
+    role: v.union(v.literal("admin"), v.literal("manager"), v.literal("staff")),
+  },
+  handler: async (ctx, args) => {
+    await assertAdmin(ctx);
+    await ctx.db.patch(args.userId, { role: args.role });
   },
 });
 

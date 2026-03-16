@@ -1,8 +1,9 @@
 "use client";
 
 import { api } from "@ShiftSync/backend/convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 
 import { Badge } from "@ShiftSync/ui/components/badge";
@@ -34,6 +35,7 @@ export default function AdminStaffPage() {
   const locations = useQuery(api.locations.listLocations, {}) ?? [];
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
   const [selectedSkill, setSelectedSkill] = useState<string>("all");
+  const updateRole = useMutation(api.userProfiles.updateRole);
 
   // We fetch without filters and do clientside filtering for an instant UI feeling
   const staff = useQuery(api.userProfiles.listStaff, {});
@@ -58,6 +60,15 @@ export default function AdminStaffPage() {
     }
     return true;
   });
+
+  const handleRoleChange = async (userId: any, newRole: string) => {
+    try {
+      await updateRole({ userId, role: newRole as any });
+      toast.success("Role updated successfully");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to update role");
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 space-y-8">
@@ -150,9 +161,21 @@ export default function AdminStaffPage() {
                 <CardHeader className="pb-3 pt-5">
                   <CardTitle className="flex items-center justify-between text-base">
                     <span className="truncate pr-4">{member.name}</span>
-                    <Badge variant="outline" className="shrink-0 capitalize">
-                      {member.role}
-                    </Badge>
+                    <Select
+                      value={member.role}
+                      onValueChange={(val) =>
+                        val && handleRoleChange(member._id, val)
+                      }
+                    >
+                      <SelectTrigger className="h-7 w-[100px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="manager">Manager</SelectItem>
+                        <SelectItem value="staff">Staff</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">

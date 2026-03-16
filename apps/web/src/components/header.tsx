@@ -104,6 +104,14 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-4">
+          <Unauthenticated>
+            <Link
+              href="/?auth=login"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Login
+            </Link>
+          </Unauthenticated>
           <ModeToggle />
         </div>
       </div>
