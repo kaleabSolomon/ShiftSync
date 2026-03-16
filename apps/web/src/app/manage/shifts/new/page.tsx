@@ -37,7 +37,9 @@ export default function NewShiftPage() {
   const locations = useQuery(api.locations.listLocations) ?? [];
   const createShift = useMutation(api.shifts.createShift);
 
-  const [locationId, setLocationId] = useState<Id<"locations"> | "">("");
+  const [locationId, setLocationId] = useState<Id<"locations"> | undefined>(
+    undefined,
+  );
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
@@ -99,7 +101,7 @@ export default function NewShiftPage() {
             <div className="space-y-1.5">
               <Label htmlFor="location">Location</Label>
               <Select
-                value={locationId}
+                value={locationId ?? ""}
                 onValueChange={(val) => setLocationId(val as Id<"locations">)}
               >
                 <SelectTrigger id="location">

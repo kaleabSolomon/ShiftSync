@@ -35,21 +35,43 @@ function AuthenticatedNav() {
           </>
         ) : (
           <>
-            <Link href="/manage/shifts" className="hover:text-primary">
-              Shifts
-            </Link>
-            <Link href="/manage/schedule" className="hover:text-primary">
-              Schedule
-            </Link>
-            <Link href="/manage/staff" className="hover:text-primary">
-              Staff
-            </Link>
-            <Link href="/manage/swaps" className="hover:text-primary">
-              Swaps
-            </Link>
-            <Link href="/manage/analytics" className="hover:text-primary">
-              Analytics
-            </Link>
+            {profile.role === "admin" ? (
+              <>
+                <Link href="/admin/locations" className="hover:text-primary">
+                  Locations
+                </Link>
+                <Link href="/admin/staff" className="hover:text-primary">
+                  Global Staff
+                </Link>
+                <Link href="/admin/schedule" className="hover:text-primary">
+                  Global Schedule
+                </Link>
+                <Link href="/admin/analytics" className="hover:text-primary">
+                  Analytics
+                </Link>
+                <Link href="/admin/audit" className="hover:text-primary">
+                  Audit Logs
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/manage/shifts" className="hover:text-primary">
+                  Shifts
+                </Link>
+                <Link href="/manage/schedule" className="hover:text-primary">
+                  Schedule
+                </Link>
+                <Link href="/manage/staff" className="hover:text-primary">
+                  Staff
+                </Link>
+                <Link href="/manage/swaps" className="hover:text-primary">
+                  Swaps
+                </Link>
+                <Link href="/manage/analytics" className="hover:text-primary">
+                  Analytics
+                </Link>
+              </>
+            )}
           </>
         )}
       </nav>

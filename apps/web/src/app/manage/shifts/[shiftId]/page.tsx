@@ -120,12 +120,6 @@ export default function ShiftDetailPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
               {format(shift.startTime, "p")} – {format(shift.endTime, "p")}
             </div>
-            {shift.location && (
-              <div className="flex items-center gap-1.5 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                {shift.location.name}
-              </div>
-            )}
             <div className="flex items-center gap-1.5 text-sm">
               <Users className="h-4 w-4 text-muted-foreground" />
               {assignments?.length ?? 0}/{shift.headcount} assigned
