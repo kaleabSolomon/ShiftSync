@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
 import UserMenu from "@/components/user-menu";
+import { StaffDashboard } from "@/components/dashboard/staff-dashboard";
+import { ManagerDashboard } from "@/components/dashboard/manager-dashboard";
 
 function Dashboard() {
   const profile = useQuery(api.userProfiles.getMyProfile);
@@ -27,7 +29,7 @@ function Dashboard() {
 
   if (!profile) {
     return (
-      <div className="container mx-auto max-w-3xl px-4 py-8">
+      <div className="container mx-auto max-w-5xl px-4 py-8">
         <div className="text-muted-foreground animate-pulse">
           Setting up your profile...
         </div>
@@ -36,20 +38,24 @@ function Dashboard() {
   }
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
-      <section className="rounded-lg border p-4 mb-6">
-        <h2 className="mb-2 font-medium text-sm text-muted-foreground uppercase tracking-wider">
-          Your Profile
-        </h2>
-        <div className="space-y-1">
-          <p className="text-lg font-medium">{profile.name}</p>
-          <p className="text-sm text-muted-foreground capitalize">
-            Role: {profile.role}
+    <div className="container mx-auto max-w-5xl px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, {profile.name}
+          </h1>
+          <p className="text-muted-foreground capitalize">
+            Signed in as {profile.role}
           </p>
         </div>
-      </section>
-      <UserMenu />
+        <UserMenu />
+      </div>
+
+      {profile.role === "staff" ? (
+        <StaffDashboard staffId={profile._id} />
+      ) : (
+        <ManagerDashboard managerId={profile._id} />
+      )}
     </div>
   );
 }
