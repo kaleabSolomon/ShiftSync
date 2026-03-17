@@ -1,6 +1,8 @@
 "use client";
 
 import { api } from "@ShiftSync/backend/convex/_generated/api";
+import type { Id } from "@ShiftSync/backend/convex/_generated/dataModel";
+import { ConvexError } from "convex/values";
 import { useMutation, useQuery } from "convex/react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -14,7 +16,108 @@ import {
   CardHeader,
   CardTitle,
 } from "@ShiftSync/ui/components/card";
-import { Check, X } from "lucide-react";
+import { Check, X, ArrowRightLeft } from "lucide-react";
+
+function extractErrorMessage(err: unknown): string {
+  if (err instanceof ConvexError) {
+    return typeof err.data === "string" ? err.data : "Operation failed";
+  }
+  if (err instanceof Error) return err.message;
+  return "Operation failed";
+}
+
+/** Sub-component that resolves and renders details for a single swap card */
+function SwapCard({
+  swap,
+  onApprove,
+  onReject,
+}: {
+  swap: {
+    _id: Id<"swapRequests">;
+    shiftId: Id<"shifts">;
+    requesterId: Id<"userProfiles">;
+    targetId: Id<"userProfiles">;
+    createdAt: number;
+    status: string;
+  };
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
+}) {
+  const requester = useQuery(api.userProfiles.getProfileById, {
+    userId: swap.requesterId,
+  });
+  const target = useQuery(api.userProfiles.getProfileById, {
+    userId: swap.targetId,
+  });
+  const shift = useQuery(api.shifts.getShift, { shiftId: swap.shiftId });
+
+  const requesterName = requester?.name ?? "Loading...";
+  const targetName = target?.name ?? "Loading...";
+
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border p-4">
+      <div className="space-y-2 flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <ArrowRightLeft className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="font-medium text-sm truncate">{requesterName}</span>
+          <span className="text-xs text-muted-foreground">→</span>
+          <span className="font-medium text-sm truncate">{targetName}</span>
+          <Badge
+            variant="outline"
+            className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300"
+          >
+            Awaiting Approval
+          </Badge>
+        </div>
+        {shift && (
+          <div className="text-xs text-muted-foreground space-y-0.5">
+            <p>
+              <span className="font-medium">Shift:</span>{" "}
+              {format(shift.startTime, "EEE MMM d, h:mm a")} –{" "}
+              {format(shift.endTime, "h:mm a")}
+            </p>
+            <p>
+              <span className="font-medium">Skill:</span>{" "}
+              <span className="capitalize">
+                {shift.requiredSkill.replace(/_/g, " ")}
+              </span>
+              {shift.location && (
+                <>
+                  {" · "}
+                  <span className="font-medium">Location:</span>{" "}
+                  {shift.location.name}
+                </>
+              )}
+            </p>
+          </div>
+        )}
+        <p className="text-[11px] text-muted-foreground">
+          Requested {format(swap.createdAt, "PP 'at' p")}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+          onClick={() => onApprove(swap._id)}
+        >
+          <Check className="mr-1 h-3.5 w-3.5" />
+          Approve
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          onClick={() => onReject(swap._id)}
+        >
+          <X className="mr-1 h-3.5 w-3.5" />
+          Reject
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function ManageSwapsPage() {
   const swapRequests = useQuery(api.swapRequests.listSwapRequests, {
@@ -36,10 +139,9 @@ export default function ManageSwapsPage() {
       await approveSwap({
         swapRequestId: id as Parameters<typeof approveSwap>[0]["swapRequestId"],
       });
-      toast.success("Swap approved.");
+      toast.success("Swap approved successfully.");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Approval failed";
-      toast.error(message);
+      toast.error(extractErrorMessage(err));
     }
   };
 
@@ -50,8 +152,7 @@ export default function ManageSwapsPage() {
       });
       toast.success("Swap rejected.");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Rejection failed";
-      toast.error(message);
+      toast.error(extractErrorMessage(err));
     }
   };
 
@@ -85,45 +186,12 @@ export default function ManageSwapsPage() {
           ) : (
             <div className="space-y-3">
               {swapRequests.map((swap) => (
-                <div
+                <SwapCard
                   key={swap._id}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">Swap Request</span>
-                      <Badge
-                        variant="outline"
-                        className="border-amber-200 bg-amber-50 text-amber-700"
-                      >
-                        Awaiting Approval
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Requested {format(swap.createdAt, "PP")}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      onClick={() => handleApprove(swap._id)}
-                    >
-                      <Check className="mr-1 h-3.5 w-3.5" />
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleReject(swap._id)}
-                    >
-                      <X className="mr-1 h-3.5 w-3.5" />
-                      Reject
-                    </Button>
-                  </div>
-                </div>
+                  swap={swap}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                />
               ))}
             </div>
           )}
