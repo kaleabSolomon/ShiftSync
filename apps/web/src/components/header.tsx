@@ -88,13 +88,6 @@ export default function Header() {
           <Authenticated>
             <AuthenticatedNav />
           </Authenticated>
-          <Unauthenticated>
-            <nav className="hidden gap-6 text-sm font-medium transition-colors md:flex">
-              <Link href="/" className="hover:text-primary">
-                Home
-              </Link>
-            </nav>
-          </Unauthenticated>
         </div>
 
         <div className="flex items-center gap-4">
