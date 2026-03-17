@@ -35,9 +35,9 @@ function Dashboard() {
 
   if (!profile) {
     return (
-      <div className="container mx-auto max-w-5xl px-4 py-8">
+      <div className="flex min-h-[80vh] items-center justify-center">
         <div className="text-muted-foreground animate-pulse">
-          Setting up your profile...
+          Getting you started...
         </div>
       </div>
     );

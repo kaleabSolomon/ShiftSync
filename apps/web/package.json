@@ -17,6 +17,7 @@
     "better-auth": "catalog:",
     "convex": "catalog:",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "dotenv": "catalog:",
     "lucide-react": "^0.577.0",
     "next": "^16.1.1",

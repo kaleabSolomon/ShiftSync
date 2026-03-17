@@ -23,7 +23,14 @@ import {
   TabsTrigger,
 } from "@ShiftSync/ui/components/tabs";
 import { PremiumShiftBadge } from "@/components/shared/premium-shift-badge";
-import { Clock, MapPin, Trash2, UserPlus, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  Trash2,
+  UserPlus,
+  Users,
+  Zap,
+} from "lucide-react";
 
 export default function ShiftDetailPage() {
   const params = useParams();
@@ -41,6 +48,14 @@ export default function ShiftDetailPage() {
   const unassignStaff = useMutation(
     api.shiftAssignments.unassignStaffFromShift,
   );
+  const eligibleReplacements = useQuery(api.shifts.suggestAlternatives, {
+    shiftId,
+  });
+
+  const isUrgent =
+    shift &&
+    shift.startTime - Date.now() < 24 * 60 * 60 * 1000 &&
+    shift.startTime > Date.now();
 
   if (!shift) {
     return (
@@ -148,6 +163,16 @@ export default function ShiftDetailPage() {
             Assignments ({assignments?.length ?? 0})
           </TabsTrigger>
           <TabsTrigger value="assign">Assign Staff</TabsTrigger>
+          <TabsTrigger value="coverage" className="flex items-center gap-1.5">
+            <Zap className="h-3.5 w-3.5" />
+            Find Coverage
+            {isUrgent && (
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="audit">
             Audit Log ({auditLog?.length ?? 0})
           </TabsTrigger>
@@ -225,6 +250,88 @@ export default function ShiftDetailPage() {
                         </p>
                       </div>
                       <Button size="sm" onClick={() => handleAssign(s._id)}>
+                        <UserPlus className="mr-1 h-3.5 w-3.5" />
+                        Assign
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Find Coverage (Emergency) */}
+        <TabsContent value="coverage">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Zap className="h-5 w-5 text-amber-600" />
+                Emergency Coverage
+              </CardTitle>
+              <CardDescription>
+                Staff who pass all constraint checks for this shift, ranked by
+                fewest warnings.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isUrgent && (
+                <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <span>
+                    This shift starts within <strong>24 hours</strong>.
+                    Prioritize assignment.
+                  </span>
+                </div>
+              )}
+
+              {eligibleReplacements === undefined ? (
+                <div className="py-8 text-center">
+                  <div className="animate-pulse text-muted-foreground text-sm">
+                    Running constraint checks against all staff...
+                  </div>
+                </div>
+              ) : eligibleReplacements.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">
+                  No eligible staff found. All candidates have constraint
+                  violations.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {eligibleReplacements.map((candidate) => (
+                    <div
+                      key={candidate.staffId}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border p-3 gap-3"
+                    >
+                      <div className="space-y-1">
+                        <p className="font-medium text-sm flex items-center gap-2">
+                          {candidate.name}
+                          {candidate.warnings.length === 0 && (
+                            <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-none">
+                              No warnings
+                            </Badge>
+                          )}
+                        </p>
+                        {candidate.warnings.length > 0 && (
+                          <div className="space-y-0.5">
+                            {candidate.warnings.map((w, i) => (
+                              <p
+                                key={i}
+                                className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1"
+                              >
+                                <AlertTriangle className="h-3 w-3 shrink-0" />
+                                {w}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          handleAssign(candidate.staffId as Id<"userProfiles">)
+                        }
+                      >
                         <UserPlus className="mr-1 h-3.5 w-3.5" />
                         Assign
                       </Button>
