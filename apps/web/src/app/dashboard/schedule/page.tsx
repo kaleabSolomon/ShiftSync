@@ -1,9 +1,12 @@
 "use client";
 
 import { api } from "@ShiftSync/backend/convex/_generated/api";
-import { useQuery } from "convex/react";
+import type { Id } from "@ShiftSync/backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { useMemo, useState } from "react";
 import { startOfWeek, addWeeks } from "date-fns";
+import { toast } from "sonner";
+import { ArrowLeftRight } from "lucide-react";
 
 import {
   Card,
@@ -14,9 +17,72 @@ import {
 import { Button } from "@ShiftSync/ui/components/button";
 import { WeekPicker } from "@/components/shared/week-picker";
 import { ShiftCard } from "@/components/shared/shift-card";
+import { SwapRequestModal } from "@/components/shared/swap-request-modal";
+
+type ShiftRow = {
+  _id: Id<"shifts">;
+  assignmentId: Id<"assignments">;
+  locationId: Id<"locations">;
+  requiredSkill: string;
+  startTime: number;
+  endTime: number;
+  headcount: number;
+  status: "draft" | "published";
+  isPremium: boolean;
+  location?: { name: string; timezone: string } | null;
+};
+
+// Inner component so useQuery for eligible targets can be per-shift
+function RequestSwapButton({ shift }: { shift: ShiftRow }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const requestSwap = useMutation(api.swapRequests.requestSwap);
+
+  // Only fetch eligible targets when the modal is open
+  const eligibleTargets = useQuery(
+    api.userProfiles.getEligibleSwapTargets,
+    isOpen ? { shiftId: shift._id } : "skip",
+  );
+
+  const handleRequestSwap = async (targetId: Id<"userProfiles">) => {
+    setIsSubmitting(true);
+    try {
+      await requestSwap({ shiftId: shift._id, targetId });
+      toast.success("Swap request sent successfully!");
+      setIsOpen(false);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to send swap request";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+        <ArrowLeftRight className="mr-1.5 h-3.5 w-3.5" />
+        Request Swap
+      </Button>
+
+      <SwapRequestModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        staffList={(eligibleTargets ?? []).map((s) => ({
+          _id: s._id,
+          name: s.name,
+        }))}
+        onRequestSwap={handleRequestSwap}
+        isSubmitting={isSubmitting}
+      />
+    </>
+  );
+}
 
 export default function SchedulePage() {
   const profile = useQuery(api.userProfiles.getMyProfile);
+
   const [weekStartDate, setWeekStartDate] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 }),
   );
@@ -96,9 +162,9 @@ export default function SchedulePage() {
                   isPremium={shift.isPremium}
                   locationName={shift.location?.name}
                   actions={
-                    <Button variant="outline" size="sm">
-                      Request Swap
-                    </Button>
+                    shift.status === "published" ? (
+                      <RequestSwapButton shift={shift as ShiftRow} />
+                    ) : null
                   }
                 />
               ))}

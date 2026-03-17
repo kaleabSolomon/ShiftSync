@@ -235,3 +235,43 @@ export const listStaff = query({
     return staff;
   },
 });
+
+export const getProfileById = query({
+  args: {
+    userId: v.id("userProfiles"),
+  },
+  handler: async (ctx, args) => {
+    await requireUserProfile(ctx);
+    return ctx.db.get(args.userId);
+  },
+});
+
+// Staff-accessible: returns co-workers eligible to swap for a given shift
+// (same skill + certified for the location), excluding the caller.
+export const getEligibleSwapTargets = query({
+  args: {
+    shiftId: v.id("shifts"),
+  },
+  handler: async (ctx, args) => {
+    const caller = await requireUserProfile(ctx);
+
+    const shift = await ctx.db.get(args.shiftId);
+    if (!shift) {
+      throw new ConvexError("Shift not found");
+    }
+
+    const allStaff = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_role", (q) => q.eq("role", "staff"))
+      .collect();
+
+    return allStaff.filter(
+      (s) =>
+        s._id !== caller._id &&
+        s.skills.includes(
+          shift.requiredSkill as "bartender" | "server" | "host" | "line_cook",
+        ) &&
+        s.certifiedLocationIds.includes(shift.locationId),
+    );
+  },
+});

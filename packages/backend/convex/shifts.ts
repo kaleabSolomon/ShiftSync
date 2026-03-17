@@ -360,6 +360,7 @@ export const getShift = query({
     return {
       ...shift,
       assignments: assignmentsWithStaff,
+      location: await ctx.db.get(shift.locationId),
     };
   },
 });
