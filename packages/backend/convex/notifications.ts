@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
-import { requireUserProfile } from "./helpers/auth";
+import { getCurrentUserProfile, requireUserProfile } from "./helpers/auth";
 import type { Id } from "./_generated/dataModel";
 
 export const sendNotification = internalMutation({
@@ -28,7 +28,8 @@ export const getNotifications = query({
     unreadOnly: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const caller = await requireUserProfile(ctx);
+    const caller = await getCurrentUserProfile(ctx);
+    if (!caller) return [];
 
     let notifications;
     if (args.unreadOnly) {
