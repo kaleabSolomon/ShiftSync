@@ -75,6 +75,9 @@ export async function isStaffAvailableForShift(
     .withIndex("by_staffId", (q) => q.eq("staffId", staffId))
     .collect();
 
+  // If the staff has no availability preferences set, treat them as fully available
+  if (allAvailability.length === 0) return true;
+
   // Helper to check if a specific time range (in minutes of a specific day) is covered
   const isRangeCovered = (
     dayOfWeek: number,

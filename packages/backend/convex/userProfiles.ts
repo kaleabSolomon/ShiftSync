@@ -182,10 +182,30 @@ export const updateRole = mutation({
   args: {
     userId: v.id("userProfiles"),
     role: v.union(v.literal("admin"), v.literal("manager"), v.literal("staff")),
+    locationId: v.optional(v.id("locations")),
   },
   handler: async (ctx, args) => {
     await assertAdmin(ctx);
     await ctx.db.patch(args.userId, { role: args.role });
+
+    // If promoting to manager and a location is provided, assign them
+    if (args.role === "manager" && args.locationId) {
+      const existing = await ctx.db
+        .query("managerLocations")
+        .withIndex("by_managerId", (q) => q.eq("managerId", args.userId))
+        .collect();
+
+      const alreadyAssigned = existing.some(
+        (a) => a.locationId === args.locationId,
+      );
+
+      if (!alreadyAssigned) {
+        await ctx.db.insert("managerLocations", {
+          managerId: args.userId,
+          locationId: args.locationId,
+        });
+      }
+    }
   },
 });
 
@@ -196,6 +216,7 @@ export const listStaff = query({
   args: {
     locationId: v.optional(v.id("locations")),
     skill: v.optional(skillValidator),
+    includeManagers: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const caller = await assertAdminOrManager(ctx);
@@ -205,6 +226,15 @@ export const listStaff = query({
       .query("userProfiles")
       .withIndex("by_role", (q) => q.eq("role", "staff"))
       .collect();
+
+    // If requested (e.g. by admin on global staff page), include managers
+    if (args.includeManagers) {
+      const managers = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_role", (q) => q.eq("role", "manager"))
+        .collect();
+      staff = [...staff, ...managers];
+    }
 
     // Manager: restrict to staff certified at their managed locations
     if (caller.role === "manager") {
@@ -232,7 +262,20 @@ export const listStaff = query({
       staff = staff.filter((s) => s.skills.includes(args.skill!));
     }
 
-    return staff;
+    const staffWithLocationsCount = await Promise.all(
+      staff.map(async (s) => {
+        if (s.role === "manager") {
+          const locs = await ctx.db
+            .query("managerLocations")
+            .withIndex("by_managerId", (q) => q.eq("managerId", s._id))
+            .collect();
+          return { ...s, managedLocationsCount: locs.length };
+        }
+        return { ...s, managedLocationsCount: 0 };
+      }),
+    );
+
+    return staffWithLocationsCount;
   },
 });
 

@@ -99,7 +99,12 @@ export default function AdminSchedulePage() {
               }
             >
               <SelectTrigger className="w-[250px] bg-background">
-                <SelectValue placeholder="Select location" />
+                <SelectValue>
+                  {activeLocationId === "all"
+                    ? "All Locations"
+                    : (locations.find((l) => l._id === activeLocationId)
+                        ?.name ?? "Select location")}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {locations.map((loc) => (

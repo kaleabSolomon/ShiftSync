@@ -190,7 +190,8 @@ export async function checkAvailabilityWindow(
 
   if (!available) {
     return {
-      ok: false,
+      ok: true,
+      isWarning: true,
       message: "Shift falls outside staff's availability window",
     };
   }

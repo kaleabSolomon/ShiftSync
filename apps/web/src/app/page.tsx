@@ -55,7 +55,10 @@ function Dashboard() {
       {profile.role === "staff" ? (
         <StaffDashboard staffId={profile._id} />
       ) : (
-        <ManagerDashboard managerId={profile._id} />
+        <ManagerDashboard
+          managerId={profile._id}
+          isAdmin={profile.role === "admin"}
+        />
       )}
     </div>
   );

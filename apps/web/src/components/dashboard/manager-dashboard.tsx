@@ -30,8 +30,10 @@ import { Badge } from "@ShiftSync/ui/components/badge";
 
 export function ManagerDashboard({
   managerId,
+  isAdmin,
 }: {
   managerId: Id<"userProfiles">;
+  isAdmin?: boolean;
 }) {
   const locations = useQuery(api.locations.listLocations);
   const [selectedLocationId, setSelectedLocationId] = useState<
@@ -89,7 +91,10 @@ export function ManagerDashboard({
             }
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select location" />
+              <SelectValue>
+                {locations.find((l) => l._id === activeLocationId)?.name ??
+                  "Select location"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {locations.map((loc) => (

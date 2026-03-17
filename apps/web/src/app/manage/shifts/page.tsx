@@ -83,7 +83,10 @@ export default function ManageShiftsPage() {
             }
           >
             <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Select location" />
+              <SelectValue>
+                {locations.find((l) => l._id === activeLocationId)?.name ??
+                  "Select location"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {locations.map((loc) => (
