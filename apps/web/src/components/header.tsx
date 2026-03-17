@@ -6,6 +6,7 @@ import { api } from "@ShiftSync/backend/convex/_generated/api";
 
 import { ModeToggle } from "./mode-toggle";
 import { NotificationBadge } from "./notification-badge";
+import UserMenu from "./user-menu";
 
 function AuthenticatedNav() {
   const profile = useQuery(api.userProfiles.getMyProfile);
@@ -25,12 +26,6 @@ function AuthenticatedNav() {
             </Link>
             <Link href="/dashboard/swaps" className="hover:text-primary">
               Swaps
-            </Link>
-            <Link
-              href="/dashboard/notifications"
-              className="hover:text-primary"
-            >
-              Notifications
             </Link>
           </>
         ) : (
@@ -75,7 +70,6 @@ function AuthenticatedNav() {
           </>
         )}
       </nav>
-      <NotificationBadge />
     </>
   );
 }
@@ -112,6 +106,12 @@ export default function Header() {
               Login
             </Link>
           </Unauthenticated>
+          <Authenticated>
+            <div className="flex items-center gap-2">
+              <NotificationBadge />
+              <UserMenu />
+            </div>
+          </Authenticated>
           <ModeToggle />
         </div>
       </div>

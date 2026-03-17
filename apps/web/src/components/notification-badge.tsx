@@ -6,6 +6,7 @@ import type { Id } from "@ShiftSync/backend/convex/_generated/dataModel";
 import { Bell } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 import { Button } from "@ShiftSync/ui/components/button";
 import {
@@ -122,6 +123,20 @@ export function NotificationBadge() {
             ))}
           </ScrollArea>
         )}
+        <DropdownMenuSeparator />
+        <div className="p-2">
+          <Link
+            href="/dashboard/notifications"
+            onClick={() => setIsOpen(false)}
+          >
+            <Button
+              variant="ghost"
+              className="w-full text-sm justify-center h-8"
+            >
+              See more
+            </Button>
+          </Link>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

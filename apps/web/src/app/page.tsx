@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from "react";
 
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
-import UserMenu from "@/components/user-menu";
 import { StaffDashboard } from "@/components/dashboard/staff-dashboard";
 import { ManagerDashboard } from "@/components/dashboard/manager-dashboard";
 
@@ -50,11 +49,7 @@ function Dashboard() {
           <h1 className="text-3xl font-bold tracking-tight">
             Welcome back, {profile.name}
           </h1>
-          <p className="text-muted-foreground capitalize">
-            Signed in as {profile.role}
-          </p>
         </div>
-        <UserMenu />
       </div>
 
       {profile.role === "staff" ? (
