@@ -33,14 +33,15 @@ export function ManagerDashboard({
 }: {
   managerId: Id<"userProfiles">;
 }) {
-  const locations = useQuery(api.locations.listLocations) ?? [];
+  const locations = useQuery(api.locations.listLocations);
   const [selectedLocationId, setSelectedLocationId] = useState<
     Id<"locations"> | undefined
   >(undefined);
 
   // Default to first location if none selected
   const activeLocationId =
-    selectedLocationId ?? (locations.length > 0 ? locations[0]._id : undefined);
+    selectedLocationId ??
+    (locations && locations.length > 0 ? locations[0]._id : undefined);
 
   // Memoize date range so useQuery args are stable across renders
   const { weekStart, weekEnd } = useMemo(() => {
@@ -80,7 +81,7 @@ export function ManagerDashboard({
           </p>
         </div>
 
-        {locations.length > 0 && (
+        {locations && locations.length > 0 && (
           <Select
             value={activeLocationId}
             onValueChange={(val) =>
@@ -125,7 +126,11 @@ export function ManagerDashboard({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {locationShifts === undefined ? (
+              {!activeLocationId ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center text-sm text-muted-foreground">
+                  You are not assigned to manage any locations.
+                </div>
+              ) : locationShifts === undefined ? (
                 <div className="animate-pulse space-y-2">
                   <div className="h-12 w-full rounded bg-muted"></div>
                   <div className="h-12 w-full rounded bg-muted"></div>
@@ -188,7 +193,11 @@ export function ManagerDashboard({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {swapRequests === undefined ? (
+              {!activeLocationId ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center text-sm text-muted-foreground">
+                  You are not assigned to manage any locations.
+                </div>
+              ) : swapRequests === undefined ? (
                 <div className="animate-pulse h-12 w-full rounded bg-muted"></div>
               ) : swapRequests.length === 0 ? (
                 <p className="text-sm text-muted-foreground">

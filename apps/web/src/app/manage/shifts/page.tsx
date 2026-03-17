@@ -26,7 +26,7 @@ import { ShiftCard } from "@/components/shared/shift-card";
 import { Plus } from "lucide-react";
 
 export default function ManageShiftsPage() {
-  const locations = useQuery(api.locations.listLocations) ?? [];
+  const locations = useQuery(api.locations.listLocations);
   const [selectedLocationId, setSelectedLocationId] = useState<
     Id<"locations"> | undefined
   >(undefined);
@@ -35,7 +35,8 @@ export default function ManageShiftsPage() {
   );
 
   const activeLocationId =
-    selectedLocationId ?? (locations.length > 0 ? locations[0]._id : undefined);
+    selectedLocationId ??
+    (locations && locations.length > 0 ? locations[0]._id : undefined);
 
   const { weekStart, weekEnd } = useMemo(
     () => ({
@@ -74,7 +75,7 @@ export default function ManageShiftsPage() {
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        {locations.length > 0 && (
+        {locations && locations.length > 0 && (
           <Select
             value={activeLocationId}
             onValueChange={(val) =>
@@ -106,7 +107,13 @@ export default function ManageShiftsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {shifts === undefined ? (
+          {!activeLocationId ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-muted-foreground">
+                You are not assigned to manage any locations.
+              </p>
+            </div>
+          ) : shifts === undefined ? (
             <div className="animate-pulse space-y-3">
               <div className="h-16 rounded-lg bg-muted" />
               <div className="h-16 rounded-lg bg-muted" />
